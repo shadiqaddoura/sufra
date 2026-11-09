@@ -19,6 +19,8 @@ export const recommendationRequestSchema = z.object({
   mood: z.string().trim().max(300).default(''),
   limit: z.number().int().min(1).max(6).default(3),
   useAi: z.boolean().default(false),
+  // A bounded browser-local taste profile, not an account or server-side history.
+  likedDishIds: z.array(z.string().min(1).max(80)).max(50).default([]),
 }).strict();
 export type RecommendationRequest = z.infer<typeof recommendationRequestSchema>;
 
@@ -39,10 +41,27 @@ export interface Dish {
   image: string;
   imagePosition?: string;
 }
+export type RankingSignal = 'flavors' | 'craving' | 'favorites';
+export interface ScoreComponent {
+  signal: RankingSignal;
+  label: string;
+  similarity: number;
+  weight: number;
+  points: number;
+}
+export interface RankingMetadata {
+  algorithm: 'content-based-v1';
+  strategy: 'personalized' | 'taste' | 'value';
+  profileSize: number;
+  recognizedCravingTerms: string[];
+}
 export interface Recommendation {
   dish: Dish;
   reasons: string[];
   matchedFlavors: Flavor[];
+  // Heuristic 0–100 points, NOT probability, confidence, or a trained-model output.
+  score: number;
+  scoreBreakdown: ScoreComponent[];
   aiExplanation?: string;
 }
 export type FallbackReason = 'not-requested' | 'not-configured' | 'provider-error' | 'invalid-output' | 'no-candidates';
@@ -50,6 +69,7 @@ export interface RecommendationResponse {
   recommendations: Recommendation[];
   meta: {
     mode: 'deterministic' | 'ai';
+    ranking: RankingMetadata;
     fallbackReason?: FallbackReason;
     totalDishes: number;
     eligibleDishes: number;

@@ -47,3 +47,19 @@ test('request deadline aborts a slow provider with no retry', async () => {
   await assert.rejects(createOpenAiRanker(config, fakeFetch).rank(dishes, preferences), /Timed out/);
   assert.equal(calls, 1);
 });
+
+test('AI gets only eligible baseline scores, not saved-dish IDs or safety constraints', async () => {
+  const { rankContentBased } = await import('../src/modules/recommendations/content-ranker.js');
+  const request = recommendationRequestSchema.parse({ maxPriceFils: 10000, likedDishIds: ['garden-quinoa'], diet: 'vegan', excludeAllergens: ['milk'] });
+  const baseline = rankContentBased(dishes, request, createCatalog().list()).recommendations;
+  const fakeFetch: typeof fetch = async (_url, options) => {
+    const input = JSON.parse(JSON.parse(String(options?.body)).input);
+    assert.deepEqual(input.baseline.map((r: { dishId: string }) => r.dishId), baseline.map(r => r.dish.id));
+    assert.ok(input.baseline.every((r: { score: number }) => typeof r.score === 'number'));
+    assert.deepEqual(Object.keys(input.preferences).sort(), ['flavors', 'mood']);
+    assert.ok(!JSON.stringify(input).includes('garden-quinoa'));
+    assert.ok(!JSON.stringify(input).includes('excludeAllergens'));
+    return Response.json({ status: 'completed', output: [{ type: 'message', content: [{ type: 'output_text', text: JSON.stringify({ picks }) }] }] });
+  };
+  await createOpenAiRanker(config, fakeFetch).rank(dishes, request, baseline);
+});

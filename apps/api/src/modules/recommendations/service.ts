@@ -2,7 +2,8 @@ import { performance } from 'node:perf_hooks';
 import type { RecommendationRequest, RecommendationResponse, FallbackReason } from '@sufra/contracts';
 import type { CatalogReader } from '../catalog/index.js';
 import type { AiRanker } from './ai-ranker.js';
-import { isEligible, rankDeterministically, violations } from './domain.js';
+import { isEligible, violations } from './domain.js';
+import { rankContentBased } from './content-ranker.js';
 
 export function createRecommendationService(catalog: CatalogReader, ai?: AiRanker) {
   return {
@@ -15,12 +16,13 @@ export function createRecommendationService(catalog: CatalogReader, ai?: AiRanke
         for (const rule of Object.keys(excluded) as (keyof typeof excluded)[]) if (failed[rule]) excluded[rule]++;
       }
       const eligible = dishes.filter(dish => isEligible(dish, request));
-      let recommendations = rankDeterministically(eligible, request);
+      const baseline = rankContentBased(eligible, request, dishes);
+      let recommendations = baseline.recommendations;
       let mode: 'deterministic' | 'ai' = 'deterministic';
       let fallbackReason: FallbackReason | undefined = !eligible.length ? 'no-candidates' : !request.useAi ? 'not-requested' : !ai ? 'not-configured' : undefined;
       if (request.useAi && ai && eligible.length) {
         try {
-          const picks = await ai.rank(eligible, request);
+          const picks = await ai.rank(eligible, request, baseline.recommendations);
           const byId = new Map(recommendations.map(rec => [rec.dish.id, rec]));
           const ids = new Set(picks.map(pick => pick.dishId));
           // The provider controls ordering and a separate explanation only. All dish facts come from the catalog.
@@ -39,7 +41,7 @@ export function createRecommendationService(catalog: CatalogReader, ai?: AiRanke
       // Defense in depth: even a faulty adapter cannot widen the eligible set.
       recommendations = recommendations.filter(rec => isEligible(rec.dish, request)).slice(0, request.limit);
       return { recommendations, meta: {
-        mode, ...(fallbackReason ? { fallbackReason } : {}), totalDishes: dishes.length,
+        mode, ranking: baseline.ranking, ...(fallbackReason ? { fallbackReason } : {}), totalDishes: dishes.length,
         eligibleDishes: eligible.length, excluded, requestId, durationMs: Math.round(performance.now() - started),
       } };
     },

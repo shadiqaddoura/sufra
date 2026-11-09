@@ -10,3 +10,7 @@
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 /* Keep the decorative orbit inside the narrow layout without hiding page overflow. */
 @media(max-width:600px){.hero{overflow:hidden}.hero h1{font-size:44px;max-width:none}.hero h1 em{font-size:44px}.hero-visual{right:0;top:85px;width:100px;height:100px}.hero-image{width:95px;height:95px;border-width:4px}.hero-stamp{display:none}.hero-copy>p:not(.eyebrow){max-width:235px}.desktop-break{display:none}.site-header nav{gap:12px}.nav-link{font-size:10px}.flavor-options{gap:6px}.flavor{font-size:10px;padding:6px}.choice{font-size:10px}.diet-options{gap:5px}.results-heading{flex-wrap:wrap}.results-heading h2{font-size:28px}}
+
+/* Explainable recommendation details keep the score separate from confidence. */
+.ranking-context{font-size:11px;line-height:1.7;color:#65745d;margin-top:8px;max-width:64em}.score-details{margin-top:9px;font-size:11px;color:#526747}.score-details summary{cursor:pointer;font-weight:600;line-height:1.6}.score-details ul{padding-left:16px;margin:8px 0;line-height:1.7}.score-details li+li{margin-top:5px}.score-details strong{font-weight:600}.score-details[open]{border-top:1px dashed #dce1d3;padding-top:8px}
+.dish-grid:has(.score-details[open]){align-items:start}

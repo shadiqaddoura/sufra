@@ -52,3 +52,16 @@ test('request logs exclude personal craving text and credentials', async () => {
   assert.equal(entries[0]?.status, 200);
   assert.equal(entries[0]?.path, '/api/recommendations');
 });
+
+test('saved taste profile works through HTTP and exposes an explainable score', async () => {
+  const app = createApp();
+  const base = { maxPriceFils: 6500, diet: 'vegan', excludeAllergens: ['sesame'] };
+  const cold = await supertest(app).post('/api/recommendations').send(base).expect(200);
+  const saved = await supertest(app).post('/api/recommendations').send({ ...base, likedDishIds: ['harissa-chicken'] }).expect(200);
+  assert.equal(cold.body.recommendations[0].dish.id, 'batata-harra');
+  assert.equal(saved.body.recommendations[0].dish.id, 'chili-lentil');
+  assert.equal(saved.body.meta.ranking.algorithm, 'content-based-v1');
+  assert.equal(saved.body.meta.ranking.profileSize, 1);
+  assert.equal(saved.body.recommendations[0].scoreBreakdown[0].signal, 'favorites');
+  await supertest(app).post('/api/recommendations').send({ ...base, likedDishIds: Array(51).fill('x') }).expect(400);
+});
