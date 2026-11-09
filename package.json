@@ -1,0 +1,17 @@
+{
+  "name": "sufra-menu-match",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "engines": { "node": ">=22.12.0" },
+  "scripts": {
+    "dev": "concurrently --kill-others -n api,web -c green,blue \"npm run dev -w @sufra/api\" \"npm run dev -w @sufra/web\"",
+    "test": "npm run test -w @sufra/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build -w @sufra/web && npm run build -w @sufra/api",
+    "start": "npm run start -w @sufra/api",
+    "check": "npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": { "concurrently": "^9.2.1", "typescript": "^5.9.3" }
+}

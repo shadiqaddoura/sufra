@@ -1,0 +1,63 @@
+{
+  "verifiedAt": "2026-11-09T19:44:32.957Z",
+  "node": "v24.14.0",
+  "productionSmoke": {
+    "origin": "http://127.0.0.1:4100",
+    "health": {
+      "status": "ok",
+      "aiAvailable": false,
+      "catalogSize": 14
+    },
+    "html": true,
+    "staticAssets": [
+      "/assets/index-CpNkIRpl.js",
+      "/assets/index-BOGUEV4-.css",
+      "/fonts/fonts.css",
+      "/images/hero.jpg"
+    ],
+    "constrainedResult": [
+      {
+        "id": "chili-lentil",
+        "priceFils": 6000,
+        "vegan": true,
+        "allergens": []
+      },
+      {
+        "id": "batata-harra",
+        "priceFils": 3750,
+        "vegan": true,
+        "allergens": []
+      },
+      {
+        "id": "garden-quinoa",
+        "priceFils": 5750,
+        "vegan": true,
+        "allergens": []
+      }
+    ],
+    "aiFallback": "not-configured"
+  },
+  "automatedChecks": {
+    "typescript": "passed",
+    "backendTests": 18,
+    "backendTestsFailed": 0,
+    "productionBuild": "passed"
+  },
+  "browserChecks": {
+    "desktopWidth": 1280,
+    "mobileWidth": 390,
+    "mobileBodyWidth": 390,
+    "flows": [
+      "initial matches",
+      "6.50 JOD vegan no-sesame filters",
+      "empty result for zero budget",
+      "favorite save and saved menu",
+      "ingredient and allergen dialog",
+      "dessert category filter",
+      "how it works page"
+    ],
+    "brokenImages": 0
+  },
+  "liveAiUsed": false,
+  "deployed": false
+}
